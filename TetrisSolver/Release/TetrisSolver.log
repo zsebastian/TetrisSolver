@@ -1,0 +1,24 @@
+﻿Build started 2014-10-20 17:43:53.
+     1>Project "C:\Users\Sebe\Documents\GitHub\TetrisSolver\TetrisSolver\TetrisSolver.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Solver.cpp
+         Solver.cpp
+     1>c:\users\sebe\documents\github\tetrissolver\tetrissolver\Color.h(279): warning C4244: 'return' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\sebe\documents\github\tetrissolver\tetrissolver\Color.h(287): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>c:\users\sebe\documents\github\tetrissolver\tetrissolver\EvaluationFunctions.h(76): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+     1>Solver.cpp(143): warning C4018: '<' : signed/unsigned mismatch
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Sebe\Documents\GitHub\TetrisSolver\Release\TetrisSolver.exe" /INCREMENTAL:NO /NOLOGO SDL2.lib SDL2main.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Sebe\Documents\GitHub\TetrisSolver\Release\TetrisSolver.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Sebe\Documents\GitHub\TetrisSolver\Release\TetrisSolver.lib" /MACHINE:X86 /SAFESEH Release\Board.obj
+         Release\main.obj
+         Release\Piece.obj
+         Release\PlayField.obj
+         Release\Solver.obj
+         Release\Window.obj
+         Generating code
+         Finished generating code
+         TetrisSolver.vcxproj -> C:\Users\Sebe\Documents\GitHub\TetrisSolver\Release\TetrisSolver.exe
+     1>Done Building Project "C:\Users\Sebe\Documents\GitHub\TetrisSolver\TetrisSolver\TetrisSolver.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.63

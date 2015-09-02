@@ -1,22 +1,22 @@
 #include "Piece.h"
 
+std::array<Piece::Settings, 7U> Piece::settings_;
+
 /*
  For reference see: http://www.colinfahey.com/tetris/tetris_diagram_pieces_orientations_new.jpg
  */
-Piece::Piece(std::array<int, PIECE_SIZE * PIECE_SIZE> tiles, Color color, int rotation, int x, int y, int max_rotations, bool sz_exception, bool reverse_rotate)
-	: tiles_(tiles)
-	, color_(color)
-	, rotation_(rotation % max_rotations)
-	, max_rotations_(max_rotations)
+Piece::Piece( int rotation, int x, int y, int type)
+	: rotation_(rotation % settings_[type].max_rotations)
 	, x_(x)
 	, y_(y)
-	, sz_exception_(sz_exception)
-	, reverse_rotate_(reverse_rotate)
-{}
-
-void Piece::RotateLeft()
+	, type_(type)
 {
-	if (reverse_rotate_)
+
+}
+
+void Piece::rotate_left()
+{
+	if (settings_[type_].reverse_rotate)
 	{
 		rotation_++;
 	}
@@ -27,14 +27,14 @@ void Piece::RotateLeft()
 
 	if (rotation_ < 0)
 	{
-		rotation_ = max_rotations_ - 1;
+		rotation_ = settings_[type_].max_rotations - 1;
 	}
-	rotation_ = rotation_ % max_rotations_;
+	rotation_ = rotation_ % settings_[type_].max_rotations;
 }
 
-void Piece::RotateRight()
+void Piece::rotate_right()
 {
-	if (reverse_rotate_)
+	if (settings_[type_].reverse_rotate)
 	{
 		rotation_--;
 	}
@@ -44,18 +44,18 @@ void Piece::RotateRight()
 	}
 	if (rotation_ < 0)
 	{
-		rotation_ = max_rotations_ - 1;
+		rotation_ = settings_[type_].max_rotations - 1;
 	}
-	rotation_ = rotation_ % max_rotations_;
+	rotation_ = rotation_ % settings_[type_].max_rotations;
 }
 
-void Piece::Move(int dx, int dy)
+void Piece::move(int dx, int dy)
 {
 	x_ += dx;
 	y_ += dy;
 }
 
-std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
+std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::get_tiles() const
 {
 	std::array<int, PIECE_SIZE * PIECE_SIZE> ret;
 	int grid_x = 0;
@@ -69,7 +69,7 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 		{
 			for (int y = 0; y < PIECE_SIZE; ++y)
 			{
-				ret[grid_y * PIECE_SIZE + grid_x] = tiles_[y * PIECE_SIZE + x];
+				ret[grid_y * PIECE_SIZE + grid_x] = settings_[type_].tiles[y * PIECE_SIZE + x] ? 1 : 0;
 				grid_y++;
 			}
 			grid_y = 0;
@@ -77,7 +77,7 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 		}
 		break;
 	case 1:
-		if (sz_exception_)
+		if (settings_[type_].sz_exception)
 		{
 			x_mod = 1;
 			grid_x = x_mod;
@@ -94,7 +94,7 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 		{
 			for (int y = PIECE_SIZE - 1; y >= 0; --y)
 			{
-				ret[grid_y * PIECE_SIZE + (grid_x)] = tiles_[y * PIECE_SIZE + (x - x_mod)];
+				ret[grid_y * PIECE_SIZE + (grid_x)] = settings_[type_].tiles[y * PIECE_SIZE + (x - x_mod)] ? 1 : 0;
 				grid_x++;
 			}
 			grid_x = x_mod;
@@ -106,7 +106,7 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 		{
 			for (int y = PIECE_SIZE - 1; y >= 0; --y)
 			{
-				ret[grid_y * PIECE_SIZE + grid_x] = tiles_[y * PIECE_SIZE + x];
+				ret[grid_y * PIECE_SIZE + grid_x] = settings_[type_].tiles[y * PIECE_SIZE + x] ? 1 : 0;
 				grid_y++;
 			}
 			grid_y = 0;
@@ -118,7 +118,7 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 		{
 			for (int y = 0; y < PIECE_SIZE; ++y)
 			{	
-				ret[grid_y * PIECE_SIZE + grid_x] = tiles_[y * PIECE_SIZE + x];
+				ret[grid_y * PIECE_SIZE + grid_x] = settings_[type_].tiles[y * PIECE_SIZE + x] ? 1 : 0;
 				grid_x++;
 			}
 			grid_x = 0;
@@ -129,115 +129,188 @@ std::array<int, PIECE_SIZE * PIECE_SIZE> Piece::GetTiles() const
 	return ret;
 }
 
-Color Piece::GetColor() const
+Color Piece::get_color() const
 {
-	return color_;
+	return settings_[type_].color;
 }
 
-int Piece::GetX() const
+int Piece::get_x() const
 {
 	return x_;
 }
 
-int Piece::GetY() const
+int Piece::get_y() const
 {
 	return y_;
 }
 
-Piece Piece::MakeO(int x, int y, int rotation)
+Piece Piece::make_O(int x, int y, int rotation)
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
-		0, 1, 1, 0, 0,
-		0, 1, 1, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-	Color::make_from_bytes(255, 255, 0),
-	rotation, x, y, 1, false, false);
+	setup_O();
+	return Piece(rotation, x, y, 0);
 }
 
-Piece Piece::MakeI(int x, int y, int rotation)
+void Piece::setup_O()
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
-		0, 1, 1, 1, 1,
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(0, 255, 255),
-		rotation, x, y, 2, false, false);
+	if (!settings_[0].setup)
+	{
+		settings_[0] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 1, 1, 0, 0,
+			0, 1, 1, 0, 0,
+			0, 0, 0, 0, 0
+			} },
+			Color::make_from_bytes(255, 255, 0),
+			1, false, false);
+	}
 }
 
-Piece Piece::MakeS(int x, int y, int rotation)
+Piece Piece::make_I(int x, int y, int rotation)
+{
+	setup_I();
+	return Piece(rotation, x, y, 1);
+}
+
+void Piece::setup_I()
+{
+	if (!settings_[1].setup)
+	{
+		settings_[1] = Settings({ {
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 1, 1, 1, 1,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0
+			} },
+			Color::make_from_bytes(0, 255, 255),
+			2, false, false);
+	}
+}
+
+Piece Piece::make_S(int x, int y, int rotation)
 { 
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
-		0, 0, 1, 1, 0,
-		0, 1, 1, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(191, 255, 0),
-		rotation, x, y, 2, true, false);
+	setup_S();
+	return Piece(rotation, x, y, 2);
 }
 
-Piece Piece::MakeZ(int x, int y, int rotation)
+void Piece::setup_S()
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0,
-		0, 1, 1, 0, 0,
-		0, 0, 1, 1, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(255, 0, 0),
-		rotation, x, y, 2, true, false);
+	if (!settings_[2].setup)
+	{
+		settings_[2] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 1, 1, 0,
+			0, 1, 1, 0, 0,
+			0, 0, 0, 0, 0
+			} },
+			Color::make_from_bytes(191, 255, 0),
+			2, true, false);
+	}
 }
 
-Piece Piece::MakeL(int x, int y, int rotation)
+Piece Piece::make_Z(int x, int y, int rotation)
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 0, 1, 0,
-		0, 1, 1, 1, 0,
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(255, 127, 0),
-		rotation, x, y, 4, false, true);
+	setup_Z();
+	return Piece(rotation, x, y, 3);
 }
 
-Piece Piece::MakeJ(int x, int y, int rotation)
+void Piece::setup_Z()
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 1, 0, 0, 0,
-		0, 1, 1, 1, 0,
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(0, 0, 255),
-		rotation, x, y, 4, false, false);
+	if (!settings_[3].setup)
+	{
+		settings_[3] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0,
+			0, 1, 1, 0, 0,
+			0, 0, 1, 1, 0,
+			0, 0, 0, 0, 0
+				} },
+				Color::make_from_bytes(255, 0, 0),
+				2, true, false);
+	}
 }
 
-Piece Piece::MakeT(int x, int y, int rotation)
+Piece Piece::make_L(int x, int y, int rotation)
 {
-	return Piece(
-	{ {
-		0, 0, 0, 0, 0,
-		0, 0, 1, 0, 0,
-		0, 1, 1, 1, 0,
-		0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0
-		} },
-		Color::make_from_bytes(255, 0, 255),
-		rotation, x, y, 4, false, false);
+	setup_L();
+	return Piece(rotation, x, y, 4);
+}
+
+void Piece::setup_L()
+{
+	if (!settings_[4].setup)
+	{
+		settings_[4] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 0, 0, 1, 0,
+			0, 1, 1, 1, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0
+				} },
+				Color::make_from_bytes(255, 127, 0),
+				4, false, true);
+	}
+}
+
+Piece Piece::make_J(int x, int y, int rotation)
+{
+	setup_J();
+	return Piece(rotation, x, y, 5);
+}
+
+void Piece::setup_J()
+{
+	if (!settings_[5].setup)
+	{
+		settings_[5] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 1, 0, 0, 0,
+			0, 1, 1, 1, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0
+				} },
+				Color::make_from_bytes(0, 0, 255),
+				4, false, false);
+	}
+}
+
+Piece Piece::make_T(int x, int y, int rotation)
+{
+	setup_T();
+	return Piece(rotation, x, y, 6);
+}
+
+void Piece::setup_T()
+{
+	if (!settings_[6].setup)
+	{
+		settings_[6] = Settings({ {
+			0, 0, 0, 0, 0,
+			0, 0, 1, 0, 0,
+			0, 1, 1, 1, 0,
+			0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0
+				} },
+				Color::make_from_bytes(255, 0, 255),
+				4, false, false);
+	}
+}
+
+int Piece::get_rotation() const
+{
+	return rotation_;
+}
+
+int Piece::get_max_rotations() const
+{
+	return settings_[type_].max_rotations;
+}
+
+void Piece::set(int x, int y, int rotation)
+{
+	x_ = x;
+	y_ = y;
+	rotation_ = rotation;
 }

@@ -5,7 +5,8 @@
 #include "Piece.h"
 #include <random>
 #include <functional>
-
+#include "PlayField.h"
+#include <deque>
 
 #define BOARD_HEIGHT 20
 #define BOARD_WIDTH 10
@@ -16,11 +17,22 @@ public:
 	enum Action { Rotate, Left, Right };
 
 	Board(int x, int y, int tile_size);
-	void Render(Window& window);
+	void render(Window& window);
 
-	bool PerformAction(Action action);
-	int Tick();
+	bool perform_action(Action action);
+
+	int tick();
+
+	bool test_collision(const Piece& piece) const;
 	
+	const Piece& get_current_piece() const;
+	const Piece& get_next_piece(int index);
+	int get_piece_count() const;
+
+	PlayField create_play_field() const;
+
+	int get_width() const { return BOARD_WIDTH; }
+	int get_height() const { return BOARD_HEIGHT; }
 private:
 	struct  Tile
 	{
@@ -35,18 +47,16 @@ private:
 		bool occupied;
 	};
 
-	void RenderBoard(Window& window);
-	void RenderTiles();
-	void RenderLivePiece();
-	void SetColor(Color color, int x, int y);
-	void ClearColors();
-	bool ImprintLivePiece();
-	int ClearRows();
+	void render_board(Window& window);
+	void render_tiles();
+	void render_live_piece();
+	void set_color(Color color, int x, int y);
+	void clear_colors();
+	bool imprint_live_piece();
+	int clear_rows();
 
-	bool TestCollision() const;
-
-	Piece RandomPiece();
-	int NextRandom(int min, int max);
+	Piece random_piece();
+	int next_random(int min, int max);
 
 	int x_, y_, tile_size_;
 	std::array<Color, BOARD_HEIGHT * BOARD_WIDTH> colors_;
@@ -54,7 +64,8 @@ private:
 
 	std::mt19937 random_engine_;
 	std::vector<std::function<Piece(int, int, int)>> piece_makers;
-
+	
 	Piece current_piece_;
-	Piece next_piece_;
+	std::deque<Piece> next_piece_queue_;
+	int piece_count_;
 };
